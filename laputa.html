@@ -2088,7 +2088,7 @@
         </section>
 
         <!-- ==========================================================================
-             Screen 03: 关卡演示 (Level Walkthrough Video Showcase)
+             Screen 03: 关卡演示 (已解除跳转拦截 + 新增超清原片直达按钮)
              ========================================================================== -->
         <section class="section-block laputa-video-sec" id="laputa-walkthrough" data-toc-group="overview">
             <div class="video-sec-wrapper">
@@ -2099,19 +2099,23 @@
                     <p class="overview-sub-title" style="margin-bottom: 0;">Whitebox &amp; Gameplay Walkthrough</p>
                 </div>
 
-                <!-- 视频播放器外壳：已接入 Bilibili 视频 BV1D8JY68EF3 -->
+                <!-- 视频播放器外壳：已移除 sandbox 弹窗拦截，点击画面内按钮可直接跳转 B 站 -->
                 <div class="video-player-frame hover-target">
                     <iframe src="https://player.bilibili.com/player.html?bvid=BV1D8JY68EF3&page=1&high_quality=1&danmaku=0&autoplay=0" 
                             allowfullscreen="true" 
                             scrolling="no" 
-                            frameborder="0" 
-                            sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts">
+                            frameborder="0">
                     </iframe>
                 </div>
 
                 <div class="video-footer-bar">
                     <span class="video-footer-caption">完整关卡流程演示，包含三大空间机制教学、单机制验证与终局复合解谜闭环</span>
-                    <span class="video-duration-pill">约 30 - 35 分钟</span>
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <a href="https://www.bilibili.com/video/BV1D8JY68EF3/" target="_blank" rel="noopener noreferrer" class="video-duration-pill hover-target" style="color: #a8ffdb; border-color: rgba(168, 255, 219, 0.4); background: rgba(168, 255, 219, 0.08); text-decoration: none;">
+                            ↗ 前往 Bilibili 观看超清原片
+                        </a>
+                        <span class="video-duration-pill">约 30 - 35 分钟</span>
+                    </div>
                 </div>
 
             </div>
