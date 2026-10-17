@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Design Portfolio</title>
+    <style>
+        /* ==========================================================================
+           隐藏浏览器原生滚动条 (保留滚动功能，实现极致沉浸感)
+           ========================================================================== */
+        html, body {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ / 老版 Edge */
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+            display: none; /* Chrome / Safari / 新版 Edge */
+        }
+       * {
+            box-sizing: border-box;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            cursor: none; /* 隐藏默认光标 */
+        }
+
+        /* 去除所有超链接默认的蓝色和下划线 */
+        a {
+            color: inherit;
+            text-decoration: none;
+            cursor: none;
+        }
+
+        /* 自定义光标 */
+        .custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+            mix-blend-mode: difference;
+        }
+
+        /* 悬停时的光标状态 */
+        .custom-cursor.hover {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(2px);
+        }
+
+        .background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .bg-image.active {
+            opacity: 0.4;
+        }
+
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* 统一控制中间菜单块和分割线的宽度，使其居中且内部左对齐 */
+        .menu-item {
+            display: block; /* 让 a 标签表现为块级元素 */
+            pointer-events: auto;
+            text-align: left; /* 维持内部文字左对齐 */
+            width: 45%;       /* 缩窄宽度（原来是60%），让整体向屏幕中央聚拢 */
+            max-width: 720px; /* 限制最大宽度，防止在大屏幕上太散 */
+            min-width: 480px;
+            margin: 25px 0;
+            cursor: none;
+            position: relative;
+        }
+
+        .divider {
+            width: 45%;
+            max-width: 720px;
+            min-width: 480px;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.12);
+            margin: 20px 0;
+        }
+
+        .menu-title {
+            font-size: 6.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0;
+            line-height: 1.05;
+            color: rgba(255, 255, 255, 0.5);
+            transition: color 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .menu-item:hover .menu-title {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .menu-subtitle {
+            font-size: 0.95rem;
+            color: #888;
+            margin-top: 15px;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* “查看” 文本的样式 */
+        .view-text {
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateX(-10px);
+            color: #ccc;
+        }
+
+        /* 悬停时显示“查看” */
+        .menu-item:hover .view-text {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+       /* 顶部导航栏（与 about.html / laputa.html 100% 像素级对齐） */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 24px 4%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            pointer-events: auto;
+        }
+        
+        /* 左上角可点击 Logo */
+        .logo {
+            font-size: 1.15rem;
+            letter-spacing: 2px;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo strong {
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .logo span {
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.55);
+            margin-left: 4px;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+        
+        .nav-links {
+            font-size: 1rem;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 自定义光标 -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+
+    <div class="background-container">
+        <!-- 替换为你自己的图片 -->
+        <div class="bg-image" id="bg-project1" style="background-image: url('Cover.jpg');"></div>
+        <div class="bg-image" id="bg-aboutme" style="background-image: url('角度C.jpg');"></div>
+    </div>
+
+    <!-- 顶部导航栏：左上角加上了 href="index.html"，点击即可回到此初始主页 -->
+    <div class="top-nav">
+        <a href="index.html" class="logo hover-target">
+            <strong>LEVEL</strong><span>DESIGN PORTFOLIO</span>
+        </a>
+        <a href="index.html" class="nav-links hover-target">精选作品</a>
+    </div>
+
+    <!-- 居中菜单内容：每个选项都变成了可点击跳转的 a 标签 -->
+    <div class="content-overlay">
+        
+        <!-- 点击跳转到 laputa.html（01 作品详情页） -->
+        <a href="laputa.html" class="menu-item hover-target" data-target="bg-project1">
+            <h1 class="menu-title">LAPUTA:<br>SHATTERED</h1>
+            <div class="menu-subtitle">
+                <span>01 崩毁的拉普达</span>
+                <span class="view-text">查看 →</span>
+            </div>
+        </a>
+
+        <div class="divider"></div>
+
+        <!-- 点击跳转到 about.html（02 个人简介页） -->
+        <a href="about.html" class="menu-item hover-target" data-target="bg-aboutme">
+            <h1 class="menu-title">ABOUT ME</h1>
+            <div class="menu-subtitle">
+                <span>02 个人简介</span>
+                <span class="view-text">查看 →</span>
+            </div>
+        </a>
+
+    </div>
+
+    <script>
+        // --- 自定义光标逻辑 ---
+        const cursor = document.getElementById('custom-cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        const hoverTargets = document.querySelectorAll('.hover-target');
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => {
+                cursor.classList.add('hover');
+            });
+            target.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hover');
+            });
+        });
+
+        // --- 背景切换与显示逻辑 ---
+        const menuItems = document.querySelectorAll('.menu-item');
+        const bgImages = document.querySelectorAll('.bg-image');
+
+        menuItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                bgImages.forEach(bg => bg.classList.remove('active'));
+                const targetId = item.getAttribute('data-target');
+                const targetBg = document.getElementById(targetId);
+                if (targetBg) {
+                    targetBg.classList.add('active');
+                }
+            });
+
+            item.addEventListener('mouseleave', () => {
+                const targetId = item.getAttribute('data-target');
+                const targetBg = document.getElementById(targetId);
+                if (targetBg) {
+                    targetBg.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
