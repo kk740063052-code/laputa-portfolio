@@ -205,9 +205,65 @@
         .nav-links:hover {
             color: #fff;
         }
+
+       /* ==========================================================================
+           全屏加载页 (Loader Overlay)
+           ========================================================================== */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #080808; 
+            z-index: 999999; 
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: wait;
+            gap: 20px; /* Logo与百分比的上下间距 */
+        }
+
+        /* 主体放大：Logo 样式 */
+        .loader-logo {
+            font-size: clamp(2.5rem, 6vw, 4.5rem); /* 大幅放大 Logo 字体 */
+            letter-spacing: 6px;
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            text-align: center;
+        }
+        .loader-logo strong {
+            font-weight: 800;
+            color: #fff;
+        }
+        .loader-logo span {
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.55);
+            margin-left: 12px;
+        }
+
+        /* 放大百分比：对齐你指定的红色外框大小 */
+        #loader-percentage {
+            font-size: clamp(3.5rem, 7vw, 6rem); /* 将字号调整至外框对应的比例 */
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.9); /* 恢复一点亮度，保持主次分明 */
+            font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; 
+            letter-spacing: 6px; /* 增加一点字间距，视觉上拉宽填满红框 */
+            line-height: 1;
+            margin-top: 10px; /* 微调与上方标题的间距，贴合红框位置 */
+        }
     </style>
 </head>
 <body>
+
+    <!-- 全屏加载遮罩层 -->
+    <!-- 全屏加载遮罩层 -->
+    <div id="loader-overlay">
+        <!-- 引入与导航栏一致的 Logo -->
+        <div class="loader-logo"><strong>LEVEL</strong><span>DESIGN PORTFOLIO</span></div>
+        <div id="loader-percentage">0%</div>
+    </div>
 
     <!-- 自定义光标 -->
     <div class="custom-cursor" id="custom-cursor"></div>
@@ -291,6 +347,107 @@
                     targetBg.classList.remove('active');
                 }
             });
+        });
+    </script>
+
+    <!-- 预加载动画与资源加载脚本 (升级版：支持视频与图片双重缓存) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const percentageEl = document.getElementById('loader-percentage');
+            const loaderOverlay = document.getElementById('loader-overlay');
+            
+            // 【重要】把你三个页面中所有不想白屏等待的 图片 和 视频 路径都写在这里
+            const assetsToPreload = [
+                // === 图片类 ===
+                'Cover.jpg',
+                '角度C.jpg',
+                '白石龙.jpg',
+                '13.jpg',
+                '初始之地.jpg',
+                'L1封面.jpg',
+                'L2封面.jpg',
+                'L3封面.jpg',
+                'Hypercube.jpg',
+                '风息碎片.jpg',
+                '风息结晶.jpg',
+                
+                // === 视频类 (补上你需要预加载的视频路径) ===
+                '机制演示视频/双倍升天术.mp4',
+                '机制演示视频/双倍平台术.mp4',
+                '机制演示视频/初始之地.mp4',
+                '机制演示视频/升天术教学.mp4',
+                '机制演示视频/跳跃感知.mp4',
+                'Level1视频/水.mp4',
+                'Level1视频/火引入.mp4',
+                'Level1视频/风息结晶引入.mp4',
+                'Level1视频/连续升天.mp4'
+                // 如果还有别的短视频，继续往这里添加即可，注意用逗号隔开
+            ];
+
+            let loadedCount = 0;
+            let currentDisplayPercent = 0;
+            let targetPercent = 0;
+
+            const checkProgress = () => {
+                targetPercent = Math.floor((loadedCount / assetsToPreload.length) * 100);
+            };
+
+            const updatePercentage = () => {
+                if (currentDisplayPercent < targetPercent) {
+                    currentDisplayPercent += Math.ceil((targetPercent - currentDisplayPercent) * 0.15);
+                    if (currentDisplayPercent > 100) currentDisplayPercent = 100;
+                    percentageEl.textContent = currentDisplayPercent + '%';
+                }
+                
+                if (currentDisplayPercent >= 100) {
+                    percentageEl.textContent = '100%';
+                    setTimeout(() => {
+                        loaderOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            loaderOverlay.style.display = 'none';
+                        }, 800); 
+                    }, 400); 
+                } else {
+                    requestAnimationFrame(updatePercentage);
+                }
+            };
+            requestAnimationFrame(updatePercentage);
+
+            if (assetsToPreload.length === 0) {
+                targetPercent = 100;
+            } else {
+                assetsToPreload.forEach(src => {
+                    // 判断是否为视频文件
+                    if (src.toLowerCase().endsWith('.mp4') || src.toLowerCase().endsWith('.webm')) {
+                        // 使用 fetch 将视频预先拉取到浏览器内存中
+                        fetch(src)
+                            .then(response => response.blob())
+                            .then(() => {
+                                loadedCount++;
+                                checkProgress();
+                            })
+                            .catch(() => {
+                                // 即使加载失败也算作处理完毕，防止卡死
+                                loadedCount++;
+                                checkProgress();
+                            });
+                    } else {
+                        // 常规图片预加载
+                        const img = new Image();
+                        img.src = src;
+                        img.onload = img.onerror = () => {
+                            loadedCount++;
+                            checkProgress();
+                        };
+                    }
+                });
+            }
+            
+            // 【兜底安全锁】强制最大等待时间 (目前设为 12 秒)
+            // 如果你的视频非常大，12秒内没加载完，也会强制让玩家进主页，体验更好
+            setTimeout(() => {
+                targetPercent = 100;
+            }, 12000);
         });
     </script>
 </body>
